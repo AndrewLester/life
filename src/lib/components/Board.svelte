@@ -1,10 +1,14 @@
 <script lang="ts">
 import type { Game } from '$lib/game';
+import BoardCell from './BoardCell.svelte';
 
 export let game: Game;
+export let boxWidth: number;
 
 let pointerDown = false;
 let wasPlaying = false;
+
+$: rows = game.cells;
 
 function onPointerDown() {
 	pointerDown = true;
@@ -34,19 +38,18 @@ function onCellClick(row: number, col: number) {
 
 <div
 	class="board"
-	style:--width={game.cells[0].length}
-	style:--height={game.cells.length}
+	style:--width={rows[0].length}
+	style:--height={rows.length}
+	style:--box-width="{boxWidth}px"
 	on:pointerdown={onPointerDown}
 	on:pointercancel={onPointerUp}
 	on:pointerup={onPointerUp}
 	on:pointerleave={onPointerLeave}
 >
-	{#each game.cells as row, rowNum (rowNum)}
-		{#each row as cell, colNum (colNum)}
-			<button
-				class="cell"
-				class:alive={cell.alive}
-				class:dead={cell.dead}
+	{#each rows as row, rowNum}
+		{#each row as cell, colNum}
+			<BoardCell
+				{cell}
 				on:pointerover={() => onPointerOver(rowNum, colNum)}
 				on:pointerdown={() => onCellClick(rowNum, colNum)}
 			/>
@@ -57,19 +60,8 @@ function onCellClick(row: number, col: number) {
 <style>
 .board {
 	display: grid;
-	grid-template-columns: repeat(var(--width), 3rem);
-	grid-template-rows: repeat(var(--height), 3rem);
+	grid-template-columns: repeat(var(--width), var(--box-width, 3rem));
+	grid-template-rows: repeat(var(--height), var(--box-width, 3rem));
 	/* aspect-ratio: 1 / 1; */
-}
-
-.cell {
-	width: 100%;
-	height: 100%;
-	border: 1px solid gray;
-	background-color: green;
-}
-
-.cell.dead {
-	background-color: black;
 }
 </style>

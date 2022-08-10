@@ -7,15 +7,14 @@ import { clock } from '$lib/stores';
 
 let game = new Game(20);
 let interval = 200;
+let zoom = 55;
 $: gameClock = clock(interval);
 
 $: if ($gameClock && game.playing) {
 	game = game.increment();
 }
-
-$: console.log($gameClock, game.playing);
 </script>
 
-<Controls bind:game bind:interval />
+<Controls bind:game bind:interval bind:zoom />
 <Settings />
-<Board bind:game />
+<Board bind:game boxWidth={zoom} />

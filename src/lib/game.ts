@@ -58,7 +58,7 @@ export class Game {
 		} else if (typeof cells === 'number') {
 			this.cells = new Array(cells)
 				.fill(0)
-				.map(() => new Array(cells).fill(0).map(() => new Cell(0)));
+				.map(() => new Array(cells).fill(0).map(() => new Cell(20)));
 		} else {
 			this.cells = clone2D(cells);
 		}
@@ -83,11 +83,10 @@ export class Game {
 	}
 
 	toggleCell(row: number, col: number): Game {
-		const board = this.clone();
-
-		board.cells[row][col].alive = !board.cells[row][col].alive;
-
-		return board;
+		const newCell = this.cells[row][col].clone();
+		newCell.alive = !this.cells[row][col].alive;
+		this.cells[row][col] = newCell;
+		return this;
 	}
 
 	clone(): Game {
@@ -107,7 +106,7 @@ export class Cell {
 	}
 
 	set alive(state: boolean) {
-		this.deathTime = state ? -1 : 0;
+		this.deathTime = state ? -1 : 20;
 	}
 
 	get dead(): boolean {
@@ -117,11 +116,23 @@ export class Cell {
 	increment(neighbors: Cell[]): Cell {
 		const livingNeighbors = neighbors.reduce((sum, cell) => sum + (cell.alive ? 1 : 0), 0);
 		if (livingNeighbors === 3) {
+			if (this.alive) {
+				return this;
+			}
 			return new Cell();
 		} else if (livingNeighbors === 2) {
-			return new Cell(this.dead ? this.deathTime + 1 : this.deathTime);
+			if (this.dead && this.deathTime < 3) {
+				return new Cell(this.deathTime + 1);
+			}
+			return this;
 		} else {
-			return new Cell(this.dead ? this.deathTime + 1 : 0);
+			if (this.dead) {
+				if (this.deathTime < 3) {
+					return new Cell(this.deathTime + 1);
+				}
+				return this;
+			}
+			return new Cell(0);
 		}
 	}
 
