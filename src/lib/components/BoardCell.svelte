@@ -7,10 +7,13 @@ export let cell: Cell;
 const deathColors = ['rgb(0, 60, 0)', 'rgb(0, 30, 0)'];
 </script>
 
-<button
+<input
+	type="checkbox"
 	class="cell"
 	class:dead={cell.dead}
 	style:--death-color={deathColors[cell.deathTime] ?? 'black'}
+	checked={cell.alive}
+	aria-checked={cell.alive}
 	on:pointerover
 	on:pointerdown
 />
