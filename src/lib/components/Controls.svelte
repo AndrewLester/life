@@ -3,12 +3,12 @@ import { Game } from '$lib/game';
 
 export let game: Game;
 export let interval: number;
-export let zoom: number;
+export let spacing: boolean;
 
 let size = game.cells.length;
 
 $: if (size) {
-	setTimeout(() => (game = new Game(size)), 200);
+	game = new Game(size);
 }
 
 function handleNext() {
@@ -25,9 +25,9 @@ function handleNext() {
 		on:click={() => (game.playing = !game.playing)}>{game.playing ? 'Pause' : 'Play'}</button
 	>
 	<button on:click={() => (game = new Game(size))}>Clear</button>
-	<input type="range" max={200 - zoom} min="1" bind:value={size} />
+	<input type="range" max="50" min="1" bind:value={size} />
 	<input type="range" max="1000" min="0" bind:value={interval} step="100" />
-	<input type="range" max="55" min="5" bind:value={zoom} step="10" />
+	<input type="checkbox" bind:checked={spacing} />
 </div>
 
 <style>

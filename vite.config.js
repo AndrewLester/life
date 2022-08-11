@@ -9,4 +9,7 @@ export default defineConfig({
 	test: {
 		includeSource: ['src/**/*.{js,ts}'],
 	},
+	ssr: {
+		noExternal: ['three', 'troika-three-text'],
+	},
 });

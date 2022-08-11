@@ -1,22 +1,28 @@
 <script lang="ts">
 import type { Game } from '$lib/game';
 import BoardCell from './BoardCell.svelte';
+import { Group } from '@threlte/core';
+import { spring } from 'svelte/motion';
 
 export let game: Game;
-export let boxWidth: number;
+export let spacing = false;
+export let drawing = false;
 
 let pointerDown = false;
 let wasPlaying = false;
 
 $: rows = game.cells;
 
-function onPointerDown() {
-	pointerDown = true;
-}
+const space = spring(1);
+
+$: space.set(spacing ? 1.2 : 1);
+$: drawing = pointerDown;
 
 function onPointerUp() {
-	onPointerLeave();
-	game.playing = wasPlaying;
+	if (pointerDown) {
+		onPointerLeave();
+		game.playing = wasPlaying;
+	}
 }
 
 function onPointerLeave() {
@@ -29,39 +35,33 @@ function onPointerOver(row: number, col: number) {
 	}
 }
 
-function onCellClick(row: number, col: number) {
+function onCellClick(e: any, row: number, col: number) {
+	if (e.detail.event.button !== 0) {
+		return;
+	}
+	pointerDown = true;
 	wasPlaying = game.playing;
 	game.playing = false;
 	game = game.toggleCell(row, col);
 }
 </script>
 
-<div
-	class="board"
-	style:--width={rows[0].length}
-	style:--height={rows.length}
-	style:--box-width="{boxWidth}px"
-	on:pointerdown={onPointerDown}
-	on:pointercancel={onPointerUp}
-	on:pointerup={onPointerUp}
-	on:pointerleave={onPointerLeave}
->
+<svelte:window on:pointerup={onPointerUp} />
+
+<Group>
 	{#each rows as row, rowNum}
 		{#each row as cell, colNum}
 			<BoardCell
 				{cell}
-				on:pointerover={() => onPointerOver(rowNum, colNum)}
-				on:pointerdown={() => onCellClick(rowNum, colNum)}
+				position={{
+					x: $space * rowNum - ($space * rows.length) / 2,
+					y: 1,
+					z: $space * colNum - ($space * row.length) / 2,
+				}}
+				on:pointerenter={() => onPointerOver(rowNum, colNum)}
+				on:pointerdown={(e) => onCellClick(e, rowNum, colNum)}
+				on:pointercancel={onPointerUp}
 			/>
 		{/each}
 	{/each}
-</div>
-
-<style>
-.board {
-	display: grid;
-	grid-template-columns: repeat(var(--width), var(--box-width, 3rem));
-	grid-template-rows: repeat(var(--height), var(--box-width, 3rem));
-	/* aspect-ratio: 1 / 1; */
-}
-</style>
+</Group>
